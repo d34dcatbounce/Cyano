@@ -109,28 +109,52 @@
     #members-page { background-color: var(--bg-white); color: var(--vivid-blue); }
     #magazine-page { background-color: var(--vivid-blue); color: var(--bg-white); }
 
-    /* --- 메인 메뉴 --- */
-    nav { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100vw; height: 100vh; overflow: hidden; gap: 0; }
-    .menu-item { flex: 1; width: 100vw; position: relative; cursor: pointer; display: flex; align-items: center; justify-content: flex-start; text-decoration: none; color: inherit; overflow: hidden; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, filter 0.4s ease; transform-origin: center; }
-    .menu-title.primary { font-size: 21vw; font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.75; letter-spacing: -0.04em; white-space: nowrap; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: absolute; z-index: 2; }
-    .marquee-track { position: absolute; left: 0; display: flex; opacity: 0; width: max-content; transition: opacity 0.3s ease; animation: slide-marquee 25s linear infinite paused; will-change: transform; }
-    .menu-item.reverse .marquee-track { animation-name: slide-marquee-reverse; }
-    .marquee-half { display: flex; gap: 4vw; padding-right: 4vw; }
-    .marquee-text { font-size: 22vw; font-weight: 900; text-transform: uppercase; margin: 0; line-height: 0.75; letter-spacing: -0.04em; white-space: nowrap; }
-    .marquee-text.outline { color: transparent; -webkit-text-stroke: 4px var(--vivid-blue); }
-    @keyframes slide-marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    @keyframes slide-marquee-reverse { 0% { transform: translateX(-50%); } 100% { transform: translateX(0%); } }
-
-    @media (hover: hover) and (pointer: fine) {
-      nav:has(.menu-item:hover) .menu-item:not(:hover) { opacity: 0.15; filter: blur(8px); transform: scale(0.98); }
-      .menu-item:hover { transform: scale(1.05); z-index: 10; }
-      .menu-item:hover .menu-title.primary { opacity: 0; transform: scale(1.1); }
-      .menu-item:hover .marquee-track { opacity: 1; animation-play-state: running; }
+    /* --- [수정] 메인 메뉴: 서류철(File Layout) 아키텍처 --- */
+    nav.file-layout {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 100%; height: 100vh; position: relative; margin-top: 10vh;
     }
-    nav.nav-locked .menu-item:not(.item-locked) { opacity: 0.15; filter: blur(8px); transform: scale(0.95); }
-    .menu-item.item-locked { transform: scale(1.05); z-index: 10; }
-    .menu-item.item-locked .menu-title.primary { opacity: 0; transform: scale(1.1); }
-    .menu-item.item-locked .marquee-track { opacity: 1; animation-play-state: running; }
+    
+    .file-tab {
+      width: 65vw; max-width: 700px; height: 140px;
+      border: 2px solid var(--vivid-blue); border-bottom: none;
+      border-radius: 15px 15px 0 0; /* 윗부분만 둥글게 깎아 탭 모양 형성 */
+      background-color: var(--crt-dark);
+      margin-bottom: -50px; /* 파일이 겹쳐 보이도록 음수 마진 적용 */
+      position: relative; text-decoration: none;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 -10px 20px rgba(0,0,0,0.5); /* 겹친 그림자 효과 */
+    }
+    
+    /* Z-index를 수동으로 줘서 위에서 아래로 덮이게 설정 */
+    .file-tab:nth-child(1) { z-index: 3; }
+    .file-tab:nth-child(2) { z-index: 2; }
+    .file-tab:nth-child(3) { z-index: 1; }
+
+    .tab-header {
+      font-size: 2.5rem; font-weight: 900; color: var(--vivid-blue);
+      padding: 20px 40px; margin: 0; text-transform: uppercase; letter-spacing: 2px;
+      transition: color 0.3s ease;
+    }
+    .tab-meta {
+      position: absolute; right: 30px; top: 30px; font-family: monospace;
+      color: rgba(0, 51, 255, 0.5); font-size: 1rem;
+    }
+
+    /* 1단계: 호버 시 위로 살짝 뽑힘 */
+    @media (hover: hover) and (pointer: fine) {
+      .file-tab:hover { transform: translateY(-25px); z-index: 10; }
+    }
+    
+    /* 2단계: 클릭 시 시선을 강탈하며 완전히 솟구침 */
+    .file-tab.selected {
+      transform: translateY(-60px) scale(1.05);
+      background-color: var(--vivid-blue);
+      z-index: 20; border-color: var(--vivid-blue);
+    }
+    .file-tab.selected .tab-header, .file-tab.selected .tab-meta {
+      color: var(--crt-dark);
+    }
 
     /* --- 매거진 스플릿 뷰 & 드롭다운 구조 --- */
     .magazine-split-view { display: flex; width: 85%; height: 65vh; align-items: center; justify-content: space-between; position: relative; }
@@ -148,15 +172,35 @@
     #mag-content-overlay::-webkit-scrollbar { width: 4px; }
     #mag-content-overlay::-webkit-scrollbar-thumb { background: var(--bg-white); }
 
-    /* --- 아카이브 및 멤버 페이지 유지 --- */
-    .archive-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5rem; width: 80%; max-width: 1100px; margin-bottom: 3rem; }
-    .leaflet-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-    .leaflet-cover { width: 100%; aspect-ratio: 3/4; border: 1px solid var(--vivid-blue); position: relative; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; transition: all 0.4s ease; background-size: cover; background-position: center; background-blend-mode: multiply; background-color: var(--vivid-blue); color: var(--bg-white); text-shadow: 0 0 10px rgba(0,0,0,0.8); }
-    .leaflet-item:hover .leaflet-cover { background-color: rgba(0, 51, 255, 0.8); transform: translateY(-5px); }
+    /* --- [수정] 아카이브 페이지: 책꽂이(Bookshelf) 컨셉 --- */
+    .bookshelf-container {
+      display: flex; height: 60vh; width: 80%; max-width: 1000px;
+      border: 2px solid var(--vivid-blue); border-top: none; /* 위가 뚫린 선반 모양 */
+      padding: 0 15px 15px 15px; gap: 8px; align-items: flex-end; margin-bottom: 2rem;
+    }
+    
+    .book-spine {
+      flex: 1; height: 95%; border: 1px solid var(--vivid-blue);
+      background-color: var(--crt-dark); color: var(--vivid-blue);
+      writing-mode: vertical-rl; transform: rotate(180deg); /* 텍스트 세로 정렬 */
+      display: flex; justify-content: center; align-items: center;
+      font-family: monospace; font-size: 1.8rem; font-weight: bold; letter-spacing: 6px;
+      cursor: pointer; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    /* 호버 시 파란색으로 물들며 두꺼워짐 */
+    .book-spine:hover {
+      background-color: var(--vivid-blue); color: var(--bg-white); 
+      flex: 1.6; height: 100%; box-shadow: 0 0 20px rgba(0, 51, 255, 0.4);
+    }
+
+    /* 아카이브 상세 모달 (유지) */
     .detail-page { background-color: var(--crt-dark); color: var(--vivid-blue); }
     .detail-container { display: flex; gap: 40px; width: 80%; max-width: 1000px; height: 60vh; align-items: center; }
     .detail-image-area { flex: 1; height: 100%; border: 1px solid var(--vivid-blue); background-size: contain; background-repeat: no-repeat; background-position: center; }
     .detail-text-area { flex: 1; text-align: left; }
+
+    /* --- 멤버 페이지 (좌표계 뷰) --- */
     .members-initial-grid { position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; width: 80%; max-width: 900px; height: 60vh; margin: 0 auto; }
     .grid-crosshair-x { position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: rgba(0, 51, 255, 0.15); pointer-events: none; }
     .grid-crosshair-y { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(0, 51, 255, 0.15); pointer-events: none; }
@@ -173,18 +217,15 @@
     .detail-manifesto { font-size: 1.05rem; line-height: 1.6; font-weight: bold; word-break: keep-all; }
 
     /* =========================================
-       5. 반응형 웹 최적화 (Mobile UI)
+       5. 반응형 웹 최적화 (Mobile UI 대폭 강화)
        ========================================= */
     @media (max-width: 768px) {
       #global-logo { top: 20px; left: 20px; font-size: 1.1rem; }
-      nav { gap: 0; }
-      .menu-title.primary { opacity: 0 !important; }
-      .marquee-track { opacity: 1 !important; animation-play-state: running !important; }
-      nav:active .menu-item:not(:active) { opacity: 0.15; filter: blur(8px); transform: scale(0.95); }
-      .menu-item:active { transform: scale(1.05); z-index: 10; }
-      .marquee-text { font-size: 30vw; }
-      .marquee-half { gap: 8vw; padding-right: 8vw; }
-      .marquee-text.outline { -webkit-text-stroke: 2px var(--vivid-blue); }
+
+      /* 모바일 서류철: 가로를 꽉 채우고 위아래 공간 확보 */
+      .file-tab { width: 90vw; height: 110px; margin-bottom: -30px; }
+      .tab-header { font-size: 1.8rem; padding: 15px 20px; }
+      .tab-meta { top: 20px; right: 20px; }
 
       .magazine-split-view { flex-direction: column; height: 80vh; justify-content: flex-start; gap: 0; margin-top: 10vh; }
       .mag-list-side { width: 85%; padding-left: 0; border-left: none; position: relative; z-index: 30; }
@@ -194,19 +235,27 @@
       .mag-list-side.open .mag-mobile-toggle { background: var(--bg-white); color: var(--vivid-blue); font-weight: bold; }
       .mag-label { font-size: 2rem; }
       .mag-item.active { transform: translateX(15px); } 
-
       .mag-preview-side { flex: 1; width: 100%; margin-top: 20px; display: flex; align-items: flex-start; }
       #mag-display-box { width: 90%; height: 55vh; max-height: 55vh; padding: 25px; }
       #mag-content-overlay { font-size: 0.9rem; }
-      .btn-return, .btn-back-archive { bottom: 3% !important; font-size: 0.8rem; padding: 10px 16px; }
 
-      .archive-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; width: 90%; margin-bottom: 4rem; }
+      /* 모바일 책꽂이: 가로 스크롤 활성화 */
+      .bookshelf-container { 
+        width: 90%; padding: 0 5px 10px 5px; overflow-x: auto; 
+        justify-content: flex-start; /* 좌측 정렬 후 스크롤 */
+      }
+      .book-spine { 
+        min-width: 60px; /* 모바일 터치를 위한 최소 너비 확보 */
+        font-size: 1.2rem;
+      }
+      
       .page-title { font-size: 2rem !important; margin-bottom: 1rem; margin-top: 30px; }
       .detail-container { flex-direction: column; height: 75vh; gap: 15px; padding-top: 40px; }
       .detail-image-area { min-height: 45%; width: 100%; }
       .detail-text-area { text-align: center; justify-content: flex-start; overflow-y: auto; padding-bottom: 20px; }
       .detail-text-area h2 { font-size: 2rem; margin-bottom: 10px; }
       .detail-text-area p { font-size: 0.95rem; }
+
       .members-initial-grid { display: flex; flex-direction: column; height: 75vh; overflow-y: auto; gap: 2.5rem; padding-top: 40px; width: 90%; }
       .grid-crosshair-x, .grid-crosshair-y { display: none; } 
       .member-box { flex-direction: column; width: 100%; position: relative; gap: 10px; padding-bottom: 20px; border-bottom: 1px dashed rgba(0, 51, 255, 0.3); }
@@ -216,6 +265,8 @@
       .member-detail { position: relative; opacity: 1; pointer-events: auto; width: 100%; transform: none !important; padding: 0 !important; text-align: center !important; }
       .detail-name { font-size: 2.2rem; margin-bottom: 10px; }
       .detail-manifesto { font-size: 0.95rem; }
+
+      .btn-return, .btn-back-archive { bottom: 3% !important; font-size: 0.8rem; padding: 10px 16px; }
     }
   </style>
 </head>
@@ -229,27 +280,18 @@
   <div id="scanner-overlay"><div class="scanner-light"></div></div>
 
   <div id="main-content" class="page-layer">
-    <nav>
-      <a href="#" class="menu-item" data-target="magazine-page">
-        <h1 class="menu-title primary">Magazine</h1>
-        <div class="marquee-track">
-          <div class="marquee-half"><span class="marquee-text outline">Magazine</span><span class="marquee-text">Magazine</span><span class="marquee-text outline">Magazine</span><span class="marquee-text">Magazine</span></div>
-          <div class="marquee-half"><span class="marquee-text outline">Magazine</span><span class="marquee-text">Magazine</span><span class="marquee-text outline">Magazine</span><span class="marquee-text">Magazine</span></div>
-        </div>
+    <nav class="file-layout">
+      <a href="#" class="file-tab" data-target="magazine-page">
+        <h2 class="tab-header">1. MAGAZINE</h2>
+        <span class="tab-meta">VOL_01</span>
       </a>
-      <a href="#" class="menu-item reverse" data-target="archive-page">
-        <h1 class="menu-title primary">Archive</h1>
-        <div class="marquee-track">
-          <div class="marquee-half"><span class="marquee-text outline">Archive</span><span class="marquee-text">Archive</span><span class="marquee-text outline">Archive</span><span class="marquee-text">Archive</span></div>
-          <div class="marquee-half"><span class="marquee-text outline">Archive</span><span class="marquee-text">Archive</span><span class="marquee-text outline">Archive</span><span class="marquee-text">Archive</span></div>
-        </div>
+      <a href="#" class="file-tab" data-target="archive-page">
+        <h2 class="tab-header">2. ARCHIVE</h2>
+        <span class="tab-meta">DATA_SET</span>
       </a>
-      <a href="#" class="menu-item" data-target="members-page">
-        <h1 class="menu-title primary">Members</h1>
-        <div class="marquee-track">
-          <div class="marquee-half"><span class="marquee-text outline">Members</span><span class="marquee-text">Members</span><span class="marquee-text outline">Members</span><span class="marquee-text">Members</span></div>
-          <div class="marquee-half"><span class="marquee-text outline">Members</span><span class="marquee-text">Members</span><span class="marquee-text outline">Members</span><span class="marquee-text">Members</span></div>
-        </div>
+      <a href="#" class="file-tab" data-target="members-page">
+        <h2 class="tab-header">3. INFO</h2>
+        <span class="tab-meta">MEMBERS</span>
       </a>
     </nav>
   </div>
@@ -290,12 +332,14 @@
 
   <div id="archive-page" class="page-layer">
     <h1 class="page-title" style="font-size: 3rem;">LAYERED WORKSPACES</h1>
-    <div class="archive-grid">
-      <div class="leaflet-item" data-target="detail-page-1"><div class="leaflet-cover">01</div><div class="leaflet-title">MANIFESTO</div></div>
-      <div class="leaflet-item" data-target="detail-page-2"><div class="leaflet-cover">02</div><div class="leaflet-title">BLUEPRINT</div></div>
-      <div class="leaflet-item" data-target="detail-page-3"><div class="leaflet-cover">03</div><div class="leaflet-title">CYAN_EXPO</div></div>
-      <div class="leaflet-item" data-target="detail-page-4"><div class="leaflet-cover">04</div><div class="leaflet-title">REACTION</div></div>
+    
+    <div class="bookshelf-container">
+      <div class="book-spine" data-target="detail-page-1">2026.02.18</div>
+      <div class="book-spine" data-target="detail-page-2">2026.02.24</div>
+      <div class="book-spine" data-target="detail-page-3">2026.03.07</div>
+      <div class="book-spine" data-target="detail-page-4">2026.03.17</div>
     </div>
+    
     <button class="retro-btn btn-return">[ RETURN TO MENU ]</button>
   </div>
 
@@ -364,28 +408,18 @@
       let currentPage = null; 
       let isAnimating = false; 
 
-      // 앱 최초 실행 시 기본 히스토리(Start Screen) 삽입
       history.replaceState({ target: null }, '', window.location.pathname);
 
-      // 메뉴 잠금 해제 (포커스 락 리셋)
-      function resetNavLock() {
-        const nav = document.querySelector('nav');
-        if(nav) {
-          nav.classList.remove('nav-locked');
-          nav.querySelectorAll('.menu-item').forEach(i => i.classList.remove('item-locked'));
-        }
+      // 서류철 선택 해제 로직 추가
+      function resetNavSelection() {
+        document.querySelectorAll('.file-tab').forEach(tab => tab.classList.remove('selected'));
       }
 
-      // [핵심] 네비게이션 엔진 (History API 연동)
-      // pushHistory 변수로 사용자가 '클릭'해서 이동한 건지, '뒤로가기'를 누른 건지 판별
       function navigateTo(targetId, speed = 'fast', pushHistory = true) {
         const target = pages[targetId];
         if (isAnimating || currentPage === target || !target) return;
         
-        // 브라우저 주소창에 해시(#) 기록 추가
-        if (pushHistory) {
-          history.pushState({ target: targetId }, '', '#' + targetId);
-        }
+        if (pushHistory) { history.pushState({ target: targetId }, '', '#' + targetId); }
 
         isAnimating = true;
         document.body.style.pointerEvents = 'none';
@@ -416,6 +450,10 @@
           });
           isAnimating = false;
           document.body.style.pointerEvents = 'auto'; 
+          
+          // 화면 전환 끝난 후 파일 탭 선택 해제
+          if (targetId !== 'main-content') resetNavSelection();
+
         }, duration);
         
         currentPage = target;
@@ -423,14 +461,11 @@
         if (targetId === 'magazine-page') updateMagDisplay(0);
       }
 
-      // [핵심] 스마트폰 자체 '뒤로가기' 제스처 감지
       window.addEventListener('popstate', (e) => {
-        resetNavLock();
-        // 저장된 방문 기록이 있으면 해당 페이지로 이동 (히스토리는 새로 추가 안 함)
+        resetNavSelection();
         if (e.state && e.state.target) {
           navigateTo(e.state.target, 'fast', false);
         } else {
-          // 기록이 없으면 맨 처음(Start Screen)으로 리부트
           if (!currentPage || isAnimating) return;
           isAnimating = true;
           dom.start.style.opacity = '1';
@@ -445,7 +480,6 @@
         }
       });
 
-      // 로고 클릭 시 맨 처음으로 (히스토리 초기화)
       dom.logo.addEventListener('click', () => {
         if (!currentPage || isAnimating) return;
         isAnimating = true;
@@ -461,11 +495,10 @@
           Object.values(pages).forEach(p => { p.classList.remove('scanning', 'fast', 'slow'); p.style.zIndex = 40; });
           currentPage = null; 
           isAnimating = false;
-          resetNavLock(); 
+          resetNavSelection();
         }, 500);
       });
 
-      // START SCAN 버튼 클릭
       document.getElementById('expose-btn').addEventListener('click', () => {
         dom.start.style.opacity = '0'; 
         dom.start.style.pointerEvents = 'none';
@@ -473,27 +506,24 @@
         setTimeout(() => navigateTo('main-content', 'slow', true), 400); 
       });
 
-      // 메뉴 및 리스트 클릭
-      document.querySelectorAll('.menu-item, .leaflet-item').forEach(el => {
+      // [수정] 파일 탭 클릭 시 selected 클래스 부여
+      document.querySelectorAll('.file-tab, .book-spine').forEach(el => {
         el.addEventListener('click', (e) => { 
           e.preventDefault(); 
-          if (el.classList.contains('menu-item')) {
-            el.closest('nav').classList.add('nav-locked');
-            el.classList.add('item-locked');
+          if (el.classList.contains('file-tab')) {
+            el.classList.add('selected'); // 클릭 시 위로 솟구치는 효과
           }
           navigateTo(el.dataset.target, 'fast', true); 
         });
       });
 
-      // 뒤로가기 버튼 누르면 시스템 자체 history.back() 실행
       document.querySelectorAll('.btn-return').forEach(btn => btn.addEventListener('click', () => {
-        history.back(); // 브라우저 뒤로가기 기능과 완벽하게 동일하게 작동
+        history.back();
       }));
       document.querySelectorAll('.btn-back-archive').forEach(btn => btn.addEventListener('click', () => {
         history.back();
       }));
 
-      // --- 매거진 모바일 토글 로직 ---
       const magToggle = document.getElementById('mag-mobile-toggle');
       const magListSide = document.querySelector('.mag-list-side');
       
